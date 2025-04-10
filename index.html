@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trolley Cohete</title>
+  
+  <!-- Hoja de estilos -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Librerías externas necesarias para el modelo 3D -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fflate@0.7.4/umd/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+</head>
+<body>
+  <div class="configure-container">
+    <!-- Sección del visor 3D -->
+    <div class="configure-product-display-wrapper">
+      <div id="scene-container"></div> <!-- Contenedor donde se renderiza la escena 3D -->
+
+      <div class="controls">
+        <!-- Aquí puedes añadir botones o controles para manipular el modelo 3D -->
+      </div>
+    </div>
+
+    <!-- Panel lateral de personalización del producto -->
+    <div class="customize-panel">
+      <div class="custom-box">
+        <h2>Trolley Cohete</h2>
+        <!-- Precio del producto -->
+        <p style="color: red; font-size: 20px;"><strong>$219.900</strong></p>
+
+        <!-- Información adicional del producto -->
+        <p style="color: #999; font-weight: bold;">SKU: C30217451<br>Scribe Kids</p>
+
+        <!-- Calificación por estrellas -->
+        <div class="rating" id="ratingStars">
+          <span class="star" data-value="1">&#9733;</span>
+          <span class="star" data-value="2">&#9733;</span>
+          <span class="star" data-value="3">&#9733;</span>
+          <span class="star" data-value="4">&#9733;</span>
+          <span class="star" data-value="5">&#9733;</span>
+        </div>
+
+        <!-- Botón "Personalizar" que despliega los botones de vista -->
+        <button id="customizeToggleBtn" class="menu-btn">
+          <span>Personalizar</span><span>▼</span>
+        </button>
+
+        <!-- Panel oculto con botones para cambiar vistas del modelo 3D -->
+        <div id="customizePanel" class="menu-panel">
+          <button id="backViewBtn" class="menu-btn">Parte de atrás</button>
+          <button id="topViewBtn" class="menu-btn">Parte de arriba</button>
+        </div>
+
+        <!-- Entrada de texto personalizada -->
+        <label for="customTextInput"><strong>Palabra</strong></label>
+        <input type="text" id="customTextInput" placeholder="Escribe algo" />
+        <!-- Botón para aplicar el texto personalizado -->
+        <button id="applyTextBtn">Generate</button>
+
+        <!-- Selector de color para el modelo 3D -->
+        <p><strong>Color</strong></p>
+        <div class="color-buttons">
+          <div class="color-circle" style="background-color: black;" data-color="black"></div>
+          <div class="color-circle" style="background-color: rgb(255, 0, 0); border: 2px solid #ff0000;" data-color="red"></div>
+        </div>
+
+        <!-- Visualización del tamaño del producto -->
+        <p><strong>Tamaño</strong></p>
+        <div class="size-box">16.5"</div>
+
+        <!-- Selector de cantidad de productos -->
+        <select>
+          <option>Cantidad</option>
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+        </select>
+
+        <!-- Botón para añadir al carrito -->
+        <button class="add-to-cart">Agregar al carrito</button>
+
+        <!-- Muestra del texto personalizado aplicado -->
+        <p id="customTextDisplay" class="text-preview"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script personalizado -->
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
