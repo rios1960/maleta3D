@@ -9,7 +9,7 @@ window.addEventListener('DOMContentLoaded', () => {
         0.1,
         1000
     );
-    camera.position.set(0, 0, 2.5);
+    camera.position.set(0, 0, 2);
     
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
@@ -17,12 +17,12 @@ window.addEventListener('DOMContentLoaded', () => {
     renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild(renderer.domElement);
 
-    // Controles con solo clic izquierdo
+    // Controles
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.03;
-    controls.minDistance = 1;
-    controls.maxDistance = 2.3;
+    controls.minDistance = 0.6;
+    controls.maxDistance = 1;
     controls.mouseButtons = {
         LEFT: THREE.MOUSE.ROTATE,
         MIDDLE: null,
@@ -33,42 +33,71 @@ window.addEventListener('DOMContentLoaded', () => {
     let textMesh = null;
     let textMesh2 = null;
 
-    const axesHelper = new THREE.AxesHelper(3);
+    // Debug: Ejes y luces
+    const axesHelper = new THREE.AxesHelper(5);
     scene.add(axesHelper);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2.0); // Aumenta intensidad
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    dirLight.position.set(5, 10, 5); // dirección desde donde "pega" la luz
-    scene.add(dirLight);
-
+    const dirLight = new THREE.DirectionalLight(0xffffff, 3.0); // Aumenta intensidad
+    dirLight.position.set(5, 10, 5);
+    scene.add(dirLight)
     renderer.shadowMap.enabled = true;
-dirLight.castShadow = true;
-    
-    const loader = new THREE.FBXLoader();
 
-    loader.load('models/Maleta_Cohete_Materiales.fbx', function (object) {
-        object.scale.set(0.2, 0.2, 0.2);
-        object.position.set(0, -0.2, 0);
-        object.rotation.y = 0;
-    
-        object.traverse(function (child) {
-            if (child.isMesh) {
-                child.material.side = THREE.DoubleSide;
-                child.material.needsUpdate = true;
-                child.castShadow = false;
-                child.receiveShadow = false;
-            }
+    // 🔄 Carga de texturas con manejo de errores
+    const textureLoader = new THREE.TextureLoader();
+    const loadTexture = (path) => {
+        return new Promise((resolve, reject) => {
+            textureLoader.load(
+                path,
+                (texture) => resolve(texture),
+                undefined,
+                (error) => {
+                    console.error(`Error al cargar textura: ${path}`, error);
+                    resolve(null); // Devuelve null si falla
+                }
+            );
         });
+    };
     
-        fbxModel = object;
-        scene.add(fbxModel);
-    }, undefined, function (error) {
-        console.error('Error al cargar FBX:', error);
+    // Configuración inicial
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let model; // Variable para almacenar el modelo
+
+    // Cargador GLB
+    const loader = new THREE.GLTFLoader();
+
+    loader.load('./models/Maleta.glb', (gltf) => {
+    model = gltf.scene;
+    scene.add(model);
+
+    // Material INVISIBLE (100% transparente)
+    const invisibleMaterial = new THREE.MeshBasicMaterial({
+        color: 0x000000,  // El color no importa (totalmente transparente)
+        transparent: true,
+        opacity: 0,        // Opacidad CERO
+        depthWrite: false  // Evita artefactos visuales
+    });
+
+    // Aplicar a ambas partes
+    model.traverse((child) => {
+        if (child.isMesh && (child.name === "P_Back_GEO" || child.name === "P_handle_GEO")) {
+            child.material = invisibleMaterial;
+            console.log(`✅ ${child.name}: Ahora es completamente invisible`);
+        }
+    });
+
+    // Ajustes del modelo
+    model.scale.set(10, 10, 10);
+    model.position.set(0, -0.15, 0);
+
+    }, undefined, (error) => {
+        console.error("❌ Error al cargar:", error);
     });
     
-
+    // Animación y resto del código (sin cambios)
     function animate() {
         requestAnimationFrame(animate);
         controls.update();
@@ -134,7 +163,7 @@ dirLight.castShadow = true;
         }
     
         const fontLoader = new THREE.FontLoader();
-        fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+        fontLoader.load('./fonts/PORN_FASHION_TRIAL.json', function (font) {
             // Eliminar texto anterior si existe
             if (textMesh) {
                 scene.remove(textMesh);
@@ -153,7 +182,7 @@ dirLight.castShadow = true;
             // Crear textMesh principal
             const textGeometry = new THREE.TextGeometry(input, {
                 font: font,
-                size: 0.06,
+                size: 0.04,
                 height: 0.01
             });
     
@@ -161,7 +190,7 @@ dirLight.castShadow = true;
             textMesh = new THREE.Mesh(textGeometry, textMaterial);
     
             textGeometry.center();
-            textMesh.position.set(0, 0.1, -0.29); // Posición original
+            textMesh.position.set(0, 0.034, -0.14); // Posición original
             textMesh.rotation.set(Math.PI, 0, Math.PI); // ← rotación correcta en vertical
 
             scene.add(textMesh);
@@ -169,15 +198,15 @@ dirLight.castShadow = true;
             // Crear textMesh2 (segundo texto)
             const textGeometry2 = new THREE.TextGeometry(input, {
             font: font,
-            size: 0.03,
-            height: 0.01
+            size: 0.02,
+            height: 0.001
         });
 
         textGeometry2.center();
 
         // Aplicar curvatura hacia arriba en eje Z (como sonrisa acostada)
         const positions = textGeometry2.attributes.position;
-        const curveStrengthZ = 0.01; // Ajusta para más o menos curvatura visual
+        const curveStrengthZ = 0.004; // Ajusta para más o menos curvatura visual
 
         // Encontrar el rango de X del texto
         let minX = Infinity, maxX = -Infinity;
@@ -206,8 +235,8 @@ dirLight.castShadow = true;
         textMesh2 = new THREE.Mesh(textGeometry2, textMaterial2);
 
         // Mantener posición y rotación original
-        textMesh2.position.set(-0.14, 0.81, -0.11);
-        textMesh2.rotation.set(Math.PI / -2, -0.5, 3.15);
+        textMesh2.position.set(-0.08, 0.4, -0.055);
+        textMesh2.rotation.set(Math.PI / -2, -0.56, 3.15);
 
         scene.add(textMesh2);
 
@@ -250,7 +279,7 @@ dirLight.castShadow = true;
             duration: 1,
             x: 0,
             y: 0,
-            z: -1, //Nueva posición para backViewBtn
+            z: -0.1, //Nueva posición para backViewBtn
             onUpdate: () => camera.lookAt(0, 0, 0),
             onComplete: () => {
                 if (textMesh) textMesh.visible = true;
@@ -262,9 +291,9 @@ dirLight.castShadow = true;
     topViewBtn.addEventListener('click', () => {
         gsap.to(camera.position, {
             duration: 1,
-            x: -0.2, //Nueva posición para topViewBtn
-            y: 1.3,
-            z: -0.15,
+            x: -0.14, //Nueva posición para topViewBtn
+            y: 0.5,
+            z: -0.05,
             onUpdate: () => camera.lookAt(0, 0, 0),
             onComplete: () => {
                 if (textMesh) textMesh.visible = false;
@@ -272,14 +301,7 @@ dirLight.castShadow = true;
             }
         });
     });
-
-
-    // Deshabilitar el clic derecho en toda la página
-    window.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-    });
-    
-});
+})
 
 
 
