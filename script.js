@@ -182,7 +182,7 @@ window.addEventListener('DOMContentLoaded', () => {
             // Crear textMesh principal
             const textGeometry = new THREE.TextGeometry(input, {
                 font: font,
-                size: 0.039,
+                size: 0.037,
                 height: 0.01
             });
     
@@ -190,7 +190,7 @@ window.addEventListener('DOMContentLoaded', () => {
             textMesh = new THREE.Mesh(textGeometry, textMaterial);
     
             textGeometry.center();
-            textMesh.position.set(0, 0.01, -0.14); // Posición original
+            textMesh.position.set(0, 0.001, -0.14); // Posición original
             textMesh.rotation.set(Math.PI, 0, Math.PI); // ← rotación correcta en vertical
 
             scene.add(textMesh);
