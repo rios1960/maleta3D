@@ -182,7 +182,7 @@ window.addEventListener('DOMContentLoaded', () => {
             // Crear textMesh principal
             const textGeometry = new THREE.TextGeometry(input, {
                 font: font,
-                size: 0.04,
+                size: 0.039,
                 height: 0.01
             });
     
@@ -190,7 +190,7 @@ window.addEventListener('DOMContentLoaded', () => {
             textMesh = new THREE.Mesh(textGeometry, textMaterial);
     
             textGeometry.center();
-            textMesh.position.set(0, 0.034, -0.14); // Posición original
+            textMesh.position.set(0, 0.01, -0.14); // Posición original
             textMesh.rotation.set(Math.PI, 0, Math.PI); // ← rotación correcta en vertical
 
             scene.add(textMesh);
@@ -198,7 +198,7 @@ window.addEventListener('DOMContentLoaded', () => {
             // Crear textMesh2 (segundo texto)
             const textGeometry2 = new THREE.TextGeometry(input, {
             font: font,
-            size: 0.02,
+            size: 0.018,
             height: 0.001
         });
 
@@ -235,7 +235,7 @@ window.addEventListener('DOMContentLoaded', () => {
         textMesh2 = new THREE.Mesh(textGeometry2, textMaterial2);
 
         // Mantener posición y rotación original
-        textMesh2.position.set(-0.08, 0.4, -0.055);
+        textMesh2.position.set(-0.08, 0.35, -0.055);
         textMesh2.rotation.set(Math.PI / -2, -0.56, 3.15);
 
         scene.add(textMesh2);
