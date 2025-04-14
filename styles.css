@@ -55,8 +55,8 @@ body {
     display: none;
     flex-direction: column;
     gap: 5px;
-    margin-left: 20px;
-    width: 500px; /* ← mismo ancho que el botón de personalizar */
+    margin-left: 10px;
+    width: 480px; /* ← mismo ancho que el botón de personalizar */
   }
   
   /* === BOTONES DENTRO DEL PANEL PERSONALIZAR === */
