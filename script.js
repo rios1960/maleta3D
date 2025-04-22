@@ -150,98 +150,121 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    let viewSelected = false; // Controla si se ha seleccionado una vista
+    let currentView = null;   // 'back' o 'top'
+    
     // 📝 Añadir texto personalizado en el modelo
-    
     document.getElementById('applyTextBtn').addEventListener('click', () => {
+        // Validación de vista seleccionada
+        if (!viewSelected) {
+            alert("Selecciona primero una vista con los botones Back o Top");
+            return;
+        }
+        
         const input = document.getElementById('customTextInput').value.trim();
-    
         if (input === "") return;
-    
+        
         if (input.length > 6) {
             alert("Máximo 6 letras.");
             return;
         }
-    
+        
         const fontLoader = new THREE.FontLoader();
         fontLoader.load('./fonts/PORN_FASHION_TRIAL.json', function (font) {
-            // Eliminar texto anterior si existe
-            if (textMesh) {
+            // Limpieza selectiva
+            if (currentView === 'back' && textMesh) {
                 scene.remove(textMesh);
                 textMesh.geometry.dispose();
                 textMesh.material.dispose();
-                textMesh = null;
             }
-    
-            if (textMesh2) {
+            
+            if (currentView === 'top' && textMesh2) {
                 scene.remove(textMesh2);
                 textMesh2.geometry.dispose();
                 textMesh2.material.dispose();
-                textMesh2 = null;
             }
-    
-            // Crear textMesh principal
-            const textGeometry = new THREE.TextGeometry(input, {
-                font: font,
-                size: 0.037,
-                height: 0.01
-            });
-    
-            const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            textMesh = new THREE.Mesh(textGeometry, textMaterial);
-    
-            textGeometry.center();
-            textMesh.position.set(0, 0.001, -0.14); // Posición original
-            textMesh.rotation.set(Math.PI, 0, Math.PI); // ← rotación correcta en vertical
-
-            scene.add(textMesh);
-    
-            // Crear textMesh2 (segundo texto)
-            const textGeometry2 = new THREE.TextGeometry(input, {
-            font: font,
-            size: 0.018,
-            height: 0.001
-        });
-
-        textGeometry2.center();
-
-        // Aplicar curvatura hacia arriba en eje Z (como sonrisa acostada)
-        const positions = textGeometry2.attributes.position;
-        const curveStrengthZ = 0.004; // Ajusta para más o menos curvatura visual
-
-        // Encontrar el rango de X del texto
-        let minX = Infinity, maxX = -Infinity;
-            for (let i = 0; i < positions.count; i++) {
-            const x = positions.getX(i);
-            if (x < minX) minX = x;
-            if (x > maxX) maxX = x;
-        }
-
-        for (let i = 0; i < positions.count; i++) {
-            const x = positions.getX(i);
-            const z = positions.getZ(i);
-
-            // Normalizar X al rango [-1, 1]
-            const t = ((x - minX) / (maxX - minX)) * 2 - 1;
-
-            // Curva tipo sonrisa en eje Z
-            const offsetZ = -Math.pow(t, 2) * curveStrengthZ + curveStrengthZ;
-
-            positions.setZ(i, z + offsetZ);
-        }
-        positions.needsUpdate = true;
-
-        // Material y mesh
-        const textMaterial2 = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        textMesh2 = new THREE.Mesh(textGeometry2, textMaterial2);
-
-        // Mantener posición y rotación original
-        textMesh2.position.set(-0.08, 0.35, -0.055);
-        textMesh2.rotation.set(Math.PI / -2, -0.56, 3.15);
-
-        scene.add(textMesh2);
-
+            
+            // Generación condicional
+            if (currentView === 'back') {
+                textMesh = createBackText(font, input);
+                scene.add(textMesh);
+            } 
+            else if (currentView === 'top') {
+                textMesh2 = createTopText(font, input);
+                scene.add(textMesh2);
+            }
         });
     });
+    
+    // Funciones auxiliares (opcional, para mejor organización)
+    function createBackText(font, text) {
+        const geometry = new THREE.TextGeometry(text, {
+            font: font,
+            size: 0.037,
+            height: 0.01
+        });
+        geometry.center();
+        
+        const mesh = new THREE.Mesh(
+            geometry,
+            new THREE.MeshBasicMaterial({ color: 0x000000 })
+        );
+        
+        mesh.position.set(0, 0.001, -0.14);
+        mesh.rotation.set(Math.PI, 0, Math.PI);
+        return mesh;
+    }
+    
+    function createTopText(font, text) {
+        const textGeometry = new THREE.TextGeometry(text, {
+            font: font,
+            size: 0.02,
+            height: 0.001,
+            curveSegments: 24  // Más segmentos = curva más suave
+        });
+        textGeometry.center();
+    
+        // 1. Obtener los vértices originales
+        const positions = textGeometry.attributes.position.array;
+        const curvedPositions = new Float32Array(positions.length);
+    
+        // 2. Parámetros de la curva "U" en Z
+        const curveIntensity = -1;  // Ajusta la profundidad de la "U"
+        const curveWidth = 0.5;      // Ajusta el ancho de la "U"
+    
+        // 3. Aplicar deformación en el eje Z
+        for (let i = 0; i < positions.length; i += 3) {
+            const x = positions[i];
+            const y = positions[i + 1];
+            const z = positions[i + 2];
+    
+            // Normalizar X entre [-1, 1] para la curva
+            const normalizedX = (x / curveWidth);
+    
+            // Fórmula de "U" aplicada a Z (en lugar de Y)
+            const curvedZ = z + (normalizedX * normalizedX) * curveIntensity;
+    
+            // Mantener X e Y sin cambios
+            curvedPositions[i] = x;
+            curvedPositions[i + 1] = y;
+            curvedPositions[i + 2] = curvedZ;  // ¡Deformación en Z!
+        }
+    
+        // Reemplazar la geometría original
+        textGeometry.setAttribute('position', new THREE.BufferAttribute(curvedPositions, 3));
+        textGeometry.computeVertexNormals();  // Para iluminación correcta
+    
+        const mesh = new THREE.Mesh(
+            textGeometry,
+            new THREE.MeshBasicMaterial({ color: 0x000000 })
+        );
+    
+        // 🔥 Mantener posición y rotación original (¡NO CAMBIAR!)
+        mesh.position.set(-0.06, 0.363, -0.055);
+        mesh.rotation.set(Math.PI / -2, -0.4, 3.15);
+    
+        return mesh;
+    }
     
 
     // Limitar el input a máximo 6 caracteres en tiempo real
@@ -275,11 +298,13 @@ window.addEventListener('DOMContentLoaded', () => {
     const topViewBtn = document.getElementById('topViewBtn');
 
     backViewBtn.addEventListener('click', () => {
+        currentView = 'back';
+        viewSelected = true; 
         gsap.to(camera.position, {
             duration: 1,
             x: 0,
             y: 0,
-            z: -0.1, //Nueva posición para backViewBtn
+            z: -0.1,
             onUpdate: () => camera.lookAt(0, 0, 0),
             onComplete: () => {
                 if (textMesh) textMesh.visible = true;
@@ -287,11 +312,13 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
+    
     topViewBtn.addEventListener('click', () => {
+        currentView = 'top';
+        viewSelected = true; 
         gsap.to(camera.position, {
             duration: 1,
-            x: -0.14, //Nueva posición para topViewBtn
+            x: -0.14,
             y: 0.5,
             z: -0.05,
             onUpdate: () => camera.lookAt(0, 0, 0),
