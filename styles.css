@@ -199,6 +199,16 @@ body {
     margin-top: 10px;
     text-align: center;
   }
+  .warning-message {
+    font-size: 14px;
+    margin-bottom: 10px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
   
   
 

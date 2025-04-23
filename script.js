@@ -155,10 +155,14 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // 📝 Añadir texto personalizado en el modelo
     document.getElementById('applyTextBtn').addEventListener('click', () => {
+        const warningElement = document.getElementById('viewWarning');
+    
         // Validación de vista seleccionada
         if (!viewSelected) {
-            alert("Selecciona primero una vista con los botones Back o Top");
+            warningElement.style.display = 'block';
             return;
+        } else {
+            warningElement.style.display = 'none';
         }
         
         const input = document.getElementById('customTextInput').value.trim();
