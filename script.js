@@ -34,9 +34,6 @@ window.addEventListener('DOMContentLoaded', () => {
     let textMesh2 = null;
 
     // Debug: Ejes y luces
-    const axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
-
     const ambientLight = new THREE.AmbientLight(0xffffff, 2.0); // Aumenta intensidad
     scene.add(ambientLight);
 
@@ -155,7 +152,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // 📝 Añadir texto personalizado en el modelo
     document.getElementById('applyTextBtn').addEventListener('click', () => {
-        const warningElement = document.getElementById('viewWarning');
+    const warningElement = document.getElementById('viewWarning');
     
         // Validación de vista seleccionada
         if (!viewSelected) {
@@ -164,7 +161,7 @@ window.addEventListener('DOMContentLoaded', () => {
         } else {
             warningElement.style.display = 'none';
         }
-        
+
         const input = document.getElementById('customTextInput').value.trim();
         if (input === "") return;
         
@@ -176,27 +173,29 @@ window.addEventListener('DOMContentLoaded', () => {
         const fontLoader = new THREE.FontLoader();
         fontLoader.load('./fonts/PORN_FASHION_TRIAL.json', function (font) {
             // Limpieza selectiva
-            if (currentView === 'back' && textMesh) {
-                scene.remove(textMesh);
-                textMesh.geometry.dispose();
-                textMesh.material.dispose();
-            }
-            
-            if (currentView === 'top' && textMesh2) {
-                scene.remove(textMesh2);
-                textMesh2.geometry.dispose();
-                textMesh2.material.dispose();
-            }
-            
-            // Generación condicional
-            if (currentView === 'back') {
-                textMesh = createBackText(font, input);
-                scene.add(textMesh);
-            } 
-            else if (currentView === 'top') {
-                textMesh2 = createTopText(font, input);
-                scene.add(textMesh2);
-            }
+        // Limpiar textos anteriores si existen
+        if (textMesh) {
+            scene.remove(textMesh);
+            textMesh.geometry.dispose();
+            textMesh.material.dispose();
+        }
+        if (textMesh2) {
+            scene.remove(textMesh2);
+            textMesh2.geometry.dispose();
+            textMesh2.material.dispose();
+        }
+        
+        // Crear ambos textos con el mismo contenido
+        textMesh = createBackText(font, input);
+        textMesh2 = createTopText(font, input);
+        
+        // Añadir ambos a la escena
+        scene.add(textMesh);
+        scene.add(textMesh2);
+        
+        // Controlar visibilidad según la vista actual
+        textMesh.visible = (currentView === 'back');
+        textMesh2.visible = (currentView === 'top');
         });
     });
     
@@ -270,16 +269,19 @@ window.addEventListener('DOMContentLoaded', () => {
         return mesh;
     }
     
-
-    // Limitar el input a máximo 6 caracteres en tiempo real
     const inputField = document.getElementById('customTextInput');
+    const charCounter = document.getElementById('charCounter');
+    
     inputField.addEventListener('input', () => {
-        if (inputField.value.length > 6) {
+        const currentLength = inputField.value.length;
+        charCounter.textContent = `${currentLength}/6`;
+        charCounter.style.color = currentLength > 6 ? 'red' : '#999';
+        
+        if (currentLength > 6) {
             inputField.value = inputField.value.slice(0, 6);
         }
     });
-
-
+    
     // Sistema de estrellas (valoración)
     const stars = document.querySelectorAll('.star');
     stars.forEach(star => {

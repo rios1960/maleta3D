@@ -63,8 +63,18 @@
 </p>
 
         <!-- Entrada de texto personalizada -->
-        <label for="customTextInput"><strong>Palabra</strong></label>
-        <input type="text" id="customTextInput" placeholder="Escribe algo" />
+        <div class="input-with-counter">
+          <label for="customTextInput"><strong>Palabra</strong></label>
+          <div class="input-container">
+              <input 
+                  type="text" 
+                  id="customTextInput" 
+                  placeholder="Escribe algo" 
+                  maxlength="6"
+              />
+              <span id="charCounter">0/6</span>
+          </div>
+      </div>
         <!-- Botón para aplicar el texto personalizado -->
         <button id="applyTextBtn">Generate</button>
 
